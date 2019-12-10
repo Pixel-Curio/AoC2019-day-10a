@@ -49,8 +49,8 @@ namespace Day_10a
             for (int y = 0; y < input.Length; y++)
                 for (int x = 0; x < input[y].Length; x++)
                 {
-                    field[x][y] = input[x][y] == '#' ? 1 : 0;
-                    asteroids.Add((x, y, 0));
+                    field[x][y] = input[y][x] == '#' ? 1 : 0;
+                    if (field[x][y] == 1) asteroids.Add((x, y, 0));
                 }
 
             for (int i = 0; i < asteroids.Count; i++)
@@ -63,9 +63,9 @@ namespace Day_10a
                     {
                         if (asteroids[o] == asteroids[i] || asteroids[o] == asteroids[t]) continue;
 
-                        if (IsCollinear((asteroids[i].x, asteroids[i]. y), 
-                            (asteroids[t].x, asteroids[t].y), 
-                            (asteroids[o].x, asteroids[o].y))) 
+                        if (IsCollinear((asteroids[i].x, asteroids[i].y),
+                            (asteroids[t].x, asteroids[t].y),
+                            (asteroids[o].x, asteroids[o].y)))
                             canSee = false;
                     }
 
