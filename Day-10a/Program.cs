@@ -9,7 +9,7 @@ namespace Day_10a
         static void Main(string[] args)
         {
             string[] input = File.ReadAllLines(@"day10a-input.txt");
-            Dictionary<(int, int), List<(int, int)>> quantities = new Dictionary<(int, int), List<(int, int)>>();
+            Dictionary<(int, int), int> quantities = new Dictionary<(int, int), int>();
 
             input = new[]
             {
@@ -33,44 +33,39 @@ namespace Day_10a
                 for (int y = 0; y < input[x].Length; y++)
                     field[x][y] = input[x][y] == '#' ? 1 : 0;
 
+            //Testing asteroid
             for (int x = 0; x < input.Length; x++)
                 for (int y = 0; y < input[x].Length; y++)
                 {
                     if (field[x][y] == 0) continue;
 
+                    //Target asteroid
                     for (int tX = 0; tX < input.Length; tX++)
                         for (int tY = 0; tY < input[x].Length; tY++)
                         {
                             if (field[tX][tY] == 0) continue;
                             if (x == tX && y == tY) continue;
 
-                            for (float i = 0; i <= 1.1f; i += 0.001f)
-                            {
-                                var pos = Lerp(new Vector2 { X = x, Y = y }, new Vector2 { X = tX, Y = tY }, i);
-                                if (pos.X == x && pos.Y == y) continue;
-
-                                if (field[pos.X][pos.Y] == 1 && !(pos.X == tX && pos.Y == tY)) break;
-
-                                if (pos.X == tX && pos.Y == tY)
+                            bool exists = true;
+                            //Test every _other_ asteroid to see if they get in the way
+                            for (int testX = 0; testX < input.Length; testX++)
+                                for (int testY = 0; testY < input[x].Length; testY++)
                                 {
-                                    if (!quantities.ContainsKey((x, y))) quantities.Add((x, y), new List<(int, int)>());
-                                    if (!quantities[(x, y)].Contains((pos.X, pos.Y))) quantities[(x, y)].Add((pos.X, pos.Y));
+                                    if ((testX == x && testY == y) || (testX == tX && testY == tY)) continue;
+
+                                    if(ExistsOnLine((x,y),(tX, tY), (testX, testY))) exists = false;
                                 }
 
-                                //if (field[pos.X][pos.Y] == 1)
-                                //{
-                                //    if (!quantities.ContainsKey((x, y))) quantities.Add((x, y), new List<(int, int)>());
-                                //    if (!quantities[(x, y)].Contains((pos.X, pos.Y))) quantities[(x, y)].Add((pos.X, pos.Y));
-                                //    break;
-                                //}
+                            if (exists)
+                            {
+                                if (!quantities.ContainsKey((x, y))) quantities.Add((x, y), 0);
+                                quantities[(x, y)]++;
                             }
                         }
                 }
 
-            foreach (var quantity in quantities) 
-                Console.WriteLine($"X:{quantity.Key.Item1} Y:{quantity.Key.Item2} #:{quantity.Value.Count}");
-
-            //PrintField(field);
+            foreach (var quantity in quantities)
+                Console.WriteLine($"X:{quantity.Key.Item1} Y:{quantity.Key.Item2} #:{quantity.Value}");
         }
 
         static void PrintField(int[][] field)
@@ -93,6 +88,26 @@ namespace Day_10a
 
         static int Lerp(int start, int end, float amount) => (int)(start * (1 - amount) + end * amount);
 
+        static bool ExistsOnLine((int, int) start, (int, int) end, (int, int) point)
+        {
+            int dxc = point.Item1 - start.Item1;
+            int dyc = point.Item2 - start.Item2;
+
+            int dxl = end.Item1 - start.Item1;
+            int dyl = end.Item2 - start.Item2;
+
+            return dxc * dyl - dyc * dxl == 0;
+        }
+
+        static float Cross((int, int) value1, (int, int) value2) =>
+            Cross(new Vector2 {X = value1.Item1, Y = value1.Item2},
+                new Vector2 {X = value2.Item1, Y = value2.Item2});
+
+        static float Cross(Vector2 value1, Vector2 value2)
+        {
+            return value1.X * value2.Y
+                   - value1.Y * value2.X;
+        }
 
         private class Vector2
         {
