@@ -11,49 +11,6 @@ namespace Day_10a
         {
             string[] input = File.ReadAllLines(@"day10a-input.txt");
 
-            input = new[]
-            {
-                "......#.#.",
-                "#..#.#....",
-                "..#######.",
-                ".#.#.###..",
-                ".#..#.....",
-                "..#....#.#",
-                "#..#....#.",
-                ".##.#..###",
-                "##...#..#.",
-                ".#....####"
-            };
-
-            //input = new[]
-            //{
-            //    "#.#...#.#.",
-            //    ".###....#.",
-            //    ".#....#...",
-            //    "##.#.#.#.#",
-            //    "....#.#.#.",
-            //    ".##..###.#",
-            //    "..#...##..",
-            //    "..##....##",
-            //    "......#...",
-            //    ".####.###."
-            //};
-
-            //input = new[]
-            //{
-            //    ".#..#..###",
-            //    "####.###.#",
-            //    "....###.#.",
-            //    "..###.##.#",
-            //    "##.##.#.#.",
-            //    "....###..#",
-            //    "..#.#..#.#",
-            //    "#..#.#.###",
-            //    ".##...##.#",
-            //    ".....#.#.."
-            //};
-
-
             List<(int x, int y, int q)> asteroids = new List<(int x, int y, int q)>();
 
             for (int y = 0; y < input.Length; y++)
@@ -66,20 +23,34 @@ namespace Day_10a
             {
                 for (int t = 0; t < asteroids.Count; t++)
                 {
+                    if (i == t) continue;
                     bool canSee = true;
 
                     for (int o = 0; o < asteroids.Count; o++)
                     {
-                        if (asteroids[o] == asteroids[i] || asteroids[o] == asteroids[t]) continue;
+                        if (o == i || o == t) continue;
 
+                        //Exists on the same line.
                         if (IsCollinear((asteroids[i].x, asteroids[i].y),
                             (asteroids[t].x, asteroids[t].y),
                             (asteroids[o].x, asteroids[o].y)))
-                            canSee = false;
+                        {
+                            //Check if o is on the line segment.
+                            if ((Math.Min(asteroids[i].x, asteroids[t].x) < asteroids[o].x &&
+                                 asteroids[o].x < Math.Max(asteroids[i].x, asteroids[t].x)) ||
+                                (Math.Min(asteroids[i].y, asteroids[t].y) < asteroids[o].y &&
+                                 asteroids[o].y < Math.Max(asteroids[i].y, asteroids[t].y)))
+                            {
+                                //Console.WriteLine($"Asteroid {asteroids[i].x}:{asteroids[i].y} can't see {asteroids[t].x}:{asteroids[t].y} because {asteroids[o].x}:{asteroids[o].y} is in the way.");
+                                canSee = false;
+                                break;
+                            }
+                        }
                     }
 
                     if (canSee)
                     {
+                        //Console.WriteLine($"Asteroid {asteroids[i].x}:{asteroids[i].y} CAN see {asteroids[t].x}:{asteroids[t].y}.");
                         var newValue = asteroids[i];
                         newValue.q++;
                         asteroids[i] = newValue;
